@@ -12,15 +12,31 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      # persist-credentials: false — otherwise checkout injects the workflow
+      # GITHUB_TOKEN as an http.https://github.com/.extraheader that overrides
+      # the FORGESWORN_READ_PAT insteadOf rewrite below, and npm ci 404s on the
+      # private mesh-kit dependency (GITHUB_TOKEN can't see other repos).
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: 24
           cache: npm
-      - name: Keep public GitHub dependencies on HTTPS
+      # mesh-kit is a PRIVATE @forgesworn git dependency. npm normalises its
+      # git+https URL to ssh://git@github.com/, so rewrite all three github.com URL
+      # forms to inject a read-only PAT over HTTPS — the previous step rewrote
+      # ssh://→https:// with no token, which still 404s on the private repo.
+      # Requires repo secret FORGESWORN_READ_PAT (fine-grained, read on
+      # forgesworn/mesh-kit).
+      - name: Authenticate git for private @forgesworn deps
+        env:
+          FORGESWORN_READ_PAT: ${{ secrets.FORGESWORN_READ_PAT }}
         run: |
-          git config --global url."https://github.com/".insteadOf ssh://git@github.com/
-          git config --global --add url."https://github.com/".insteadOf git@github.com:
+          AUTH="https://x-access-token:${FORGESWORN_READ_PAT}@github.com/"
+          git config --global url."$AUTH".insteadOf "https://github.com/"
+          git config --global --add url."$AUTH".insteadOf "ssh://git@github.com/"
+          git config --global --add url."$AUTH".insteadOf "git@github.com:"
       - run: npm ci
       - run: npm test
       - run: npm run typecheck
