@@ -1,0 +1,43 @@
+{
+  "name": "mesh-nostr-kit",
+  "version": "0.1.0",
+  "description": "Nostr relay transport for opaque mesh-kit frames",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "compatibility-vectors"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/forgesworn/mesh-nostr-kit.git"
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "mesh-kit": "git+https://github.com/forgesworn/mesh-kit.git#cc3b7964cc4fc6953963538c4cd6a74a76df389a",
+    "nostr-tools": "^2.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}

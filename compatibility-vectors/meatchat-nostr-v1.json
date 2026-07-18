@@ -1,0 +1,42 @@
+{
+  "schema": "forgesworn.mesh-nostr.compatibility.v1",
+  "source": {
+    "repository": "forgesworn/meatchat",
+    "commit": "5fa6518abb9abf3e031b5771d94ca7d1639986d1",
+    "paths": [
+      "src/net/nostr-frame.ts",
+      "src/net/room-seal.ts",
+      "app/src/core/nostr-transport.ts"
+    ]
+  },
+  "eventKind": 20316,
+  "room": "venue:test-bar/8f3a9c",
+  "roomTag": "09f4450148a9b94b75f228a96d3e745648f814ce1eacbab589789fb135f3a4b8",
+  "body": {
+    "k": "channel",
+    "p": { "bytes": { "$u8": "AH//" } },
+    "f": "alice",
+    "t": "bob",
+    "i": "bridge-1"
+  },
+  "fixedIvHex": "000102030405060708090a0b",
+  "sealed": "AAECAwQFBgcICQoLf091FDODULa7VrP1WVpBeBMrgPHRkZxXd2V+31Iy8iHWLML7qPIGBSHBXc55Hkk/fLCfhdc5xfdzEf9IBeUu7pb8PSL/cWWf0tKB8Qym4vpOe/RsTNdnfVzU2idca+2a2g==",
+  "event": {
+    "kind": 20316,
+    "created_at": 1700,
+    "tags": [["t", "room-hash-abc"]]
+  },
+  "jsonBytes": {
+    "inputHex": "007fff",
+    "markerBase64": "AH//"
+  },
+  "pacing": {
+    "submittedKinds": ["channel", "channel", "presence"],
+    "publishedKinds": ["presence", "channel", "channel"]
+  },
+  "reconnect": {
+    "silenceMs": 30,
+    "tickMs": 10,
+    "minimumSubscriptions": 2
+  }
+}
