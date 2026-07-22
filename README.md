@@ -124,7 +124,7 @@ All exports come from the single entry point `mesh-nostr-kit`.
 
 `compatibility-vectors/meatchat-nostr-v1.json` freezes the original event kind,
 room tag, domain-separated seal bytes, byte marker, pacing order and reconnect
-contract from Meatchat commit `5fa6518abb9abf3e031b5771d94ca7d1639986d1`.
+contract from the original transport implementation.
 `src/compatibility.test.ts` asserts every value in the vector on each test run,
 so a regression in wire compatibility fails CI.
 
