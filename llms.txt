@@ -1,0 +1,95 @@
+# mesh-nostr-kit
+
+> mesh-kit defines a transport-agnostic mesh network abstraction but ships no transport. mesh-nostr-kit is the Nostr relay transport for it: NIP-16 frame events over an opaque room tag, AES-256-GCM room sealing, byte-safe recursive JSON for `Uint8Array` payloads, ordered seal/open chains, event/bridge deduplication, control/bulk publish pacing and silent-subscription recovery — extracted from Meatchat's proven relay lane without pulling Nostr into mesh-kit core.
+
+GitHub: https://github.com/forgesworn/mesh-nostr-kit
+
+ESM-only. Single entry point — `mesh-nostr-kit` (no subpath exports). Requires Node.js 20+.
+
+## Install
+
+npm install mesh-nostr-kit
+
+## Exports
+
+All exports come from the single entry point `mesh-nostr-kit`.
+
+### Transport
+Connect and run the mesh transport over Nostr relays.
+
+- connectNostrMeshTransport(options) → Promise<RunningNostrMeshTransport> — connects an ordered, sealed MeshTransport over an injected Nostr pool and signer
+- publishGapForRelays(relays, options) → number — resolves the strictest relay publish gap from a per-relay policy
+
+Types: MeshPool, NostrEventSigner, NostrMeshTransportOptions, NostrSignedEvent, RelayHealth, RunningNostrMeshTransport
+
+### Frame events
+NIP-16 event encode/decode for sealed frame content.
+
+- DEFAULT_MESH_EVENT_KIND — 20316 (Meatchat's original ephemeral event kind)
+- encodeFrameEvent(sealedContent, options) → NostrEventTemplate
+- decodeFrameEvent(event, options) → string | null (the sealed content, or null if kind/tag/content don't match)
+
+Types: FrameEventOptions ({ roomTag, eventKind? }), NostrEventLike, NostrEventTemplate
+
+### Room sealing
+AES-256-GCM sealing of frame bodies, keyed by an HKDF-derived per-room key.
+
+- DEFAULT_ROOM_SEAL_DOMAIN — 'meatchat/room-seal/v1' (HKDF salt/domain separator)
+- deriveRoomKey(room, options?) → Promise<CryptoKey>
+- deriveRoomTag(room) → Promise<string> (SHA-256 hex digest, used as the opaque `t` tag)
+- sealRoomFrame(key, body, options?) → Promise<string> (base64 of iv || ciphertext)
+- openRoomFrame(key, content) → Promise<SealedFrameBody | null>
+
+Types: RoomKeyOptions ({ domain? }), SealOptions ({ randomBytes? }), SealedFrameBody ({ k, p, f, t?, i? })
+
+### Byte-safe JSON
+Recursive JSON transform so `Uint8Array` payloads survive `JSON.stringify`/`parse`.
+
+- jsonSafePayload(value) → unknown — wraps every `Uint8Array` as `{ $u8: base64 }`, recursing through arrays/objects
+- revivePayload(value) → unknown — reverses jsonSafePayload
+- bytesToBase64(bytes) → string
+- base64ToBytes(value) → Uint8Array | null (null on invalid base64)
+
+### nostr-tools helpers
+Optional standard implementations of the injectable `MeshPool`/`NostrEventSigner` ports.
+
+- createNostrToolsPool() → MeshPool — wraps nostr-tools' `SimplePool`
+- createEphemeralNostrSigner(secretKey?) → NostrEventSigner — wraps nostr-tools' `finalizeEvent` with a throwaway (or supplied) secret key
+
+## Quick Examples
+
+```typescript
+import {
+  connectNostrMeshTransport,
+  createEphemeralNostrSigner,
+  createNostrToolsPool,
+} from 'mesh-nostr-kit'
+
+const transport = await connectNostrMeshTransport({
+  relays: ['wss://relay.example'],
+  room: 'venue:opaque-room-secret',
+  selfId: 'persona-fingerprint',
+  pool: createNostrToolsPool(),
+  signer: createEphemeralNostrSigner(),
+  priority: (frame) => frame.kind === 'channel' ? 'bulk' : 'control',
+})
+
+transport.subscribe((frame) => console.log(frame.kind, frame.from, frame.payload))
+transport.broadcast({ kind: 'presence', payload: { at: Date.now() } })
+transport.stop()
+```
+
+```typescript
+// --- Low-level primitives, for a custom MeshPool/signer or a different transport ---
+import { deriveRoomKey, sealRoomFrame, openRoomFrame, jsonSafePayload, revivePayload } from 'mesh-nostr-kit'
+
+const key = await deriveRoomKey('venue:opaque-room-secret')
+const sealed = await sealRoomFrame(key, {
+  k: 'channel',
+  p: jsonSafePayload({ bytes: new Uint8Array([0, 127, 255]) }),
+  f: 'alice',
+})
+
+const body = await openRoomFrame(key, sealed)
+const payload = revivePayload(body!.p) // { bytes: Uint8Array([0, 127, 255]) }
+```

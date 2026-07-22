@@ -13,7 +13,9 @@
   },
   "files": [
     "dist",
-    "compatibility-vectors"
+    "compatibility-vectors",
+    "LICENSE",
+    "llms.txt"
   ],
   "scripts": {
     "build": "tsc",
