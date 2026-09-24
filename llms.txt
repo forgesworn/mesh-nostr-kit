@@ -8,7 +8,9 @@ ESM-only. Single entry point — `mesh-nostr-kit` (no subpath exports). Requires
 
 ## Install
 
-npm install mesh-nostr-kit
+Not on npm yet. Install from Git, pinned to a commit:
+
+npm install 'git+https://github.com/forgesworn/mesh-nostr-kit.git#<commit-sha>'
 
 ## Exports
 

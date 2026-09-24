@@ -22,8 +22,10 @@ other runtimes.
 
 ## Install
 
+Not on npm yet. Install from Git, pinned to a commit:
+
 ```sh
-npm install mesh-nostr-kit
+npm install 'git+https://github.com/forgesworn/mesh-nostr-kit.git#<commit-sha>'
 ```
 
 ESM-only, single entry point (no subpath exports), MIT licensed. Requires

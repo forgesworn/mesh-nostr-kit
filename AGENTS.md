@@ -58,4 +58,4 @@ Instructions in this file apply to the entire repository.
   | Tooling, docs, refactor with no behaviour change | Patch or none |
 
 - Tests must pass before release-related changes are considered complete.
-- **Known constraint:** `mesh-kit` is a private `@forgesworn` git dependency pinned to a commit SHA (CI authenticates it with a `FORGESWORN_READ_PAT` repo secret over HTTPS). Until `mesh-kit` is itself public or published to npm, an external `npm install mesh-nostr-kit` will fail for anyone without read access to `forgesworn/mesh-kit`.
+- **Known constraint:** `mesh-kit` is a git dependency pinned to a commit SHA. CI authenticates it with a `FORGESWORN_READ_PAT` repo secret over HTTPS, set up while `forgesworn/mesh-kit` was private; it is public now. Neither package is on npm yet, so consumers install this one from Git, as the README shows.
